@@ -68,7 +68,7 @@ for key, value in wordcountdict.items():
 for key, value in txtStr:
     print(key)
 
-#OR
+OR
 
 from collections import Counter
 
