@@ -18,7 +18,7 @@ player_money = {0}
 hand = {'cards': []}
 dealer_hand = {'cards': []}
 
-#replay numbder definition 
+#replay number initialization 
 replay_number = 0
 
 #player win, lose, or tie variable to end game
@@ -61,12 +61,14 @@ def dealer_dap(hand, deck):
     dealer_hand['cards'].append(drawn_card)
     global dealer_sum
     dealer_sum = sum_of_dealer(dealer_hand)
+    dealer_sum
 
 # hit function, draws 1 and tells player card 
 def draw_on_hit(hand, deck):
     drawn_card = deck.pop()
     hand['cards'].append(drawn_card)
     print(f"You draw a {hand['cards'][-1]['rank']} of {hand['cards'][-1]['suit']}")
+    print()
     global hand_sum
     hand_sum = sum_of_ranks(hand)
 
@@ -98,7 +100,7 @@ print('How much money are you bringing to the table?')
 print()
 while True:
     player_money = input('>')
-    if not player_money.isdigit():
+    if not player_money.isdigit() or int(player_money) < 1:
         print('Invalid input. Please enter a number')
         print()
     else:
@@ -108,6 +110,7 @@ while True:
 #The rest of the code is actual gameplay:
 while True:
     #game start, place bets
+    replay_number += 1
     print('How much would you like to wager?')
     print()
     while True:
@@ -116,22 +119,24 @@ while True:
             print("Invalid input. Please enter a number.")
         elif int(player_money) < int(wager):
             print("Insufficient funds.")
+            print()
         else:
             print(f'You bet {wager} chips')
             print()
+            player_money = int(player_money) - int(wager)
             time.sleep(1)
             break
+    
     game_start(hand, deck)
-
     while True:
         #dealer draws until 17, gives illusion of other players in game
         if blackjack:
             print(f"The dealer turns over a {dealer_hand['cards'][-1]['rank']} of {hand['cards'][-1]['suit']}")
             print()
             if dealer_sum == 21:
-                player_tie()
+                player_tie = True
             else:
-                player_win()
+                player_win = True
             while dealer_sum < 17:
                 dealer_dap(hand, deck)
                 print(f"The dealer draws a {dealer_hand['cards'][-1]['rank']} of {dealer_hand['cards'][-1]['suit']}")
@@ -157,6 +162,7 @@ while True:
                     time.sleep(1)
                     print()
                     print(f"The dealer turns over a {dealer_hand['cards'][-1]['rank']} of {hand['cards'][-1]['suit']}")
+                    print()
                     time.sleep(1)
                     while dealer_sum < 17:
                         dealer_dap(hand, deck)
@@ -201,48 +207,57 @@ while True:
     if blackjack and player_win:
         print(f'Blackjack!')
         print()
-        time.sleep(0.5)
+        time.sleep(0.75)
         #payout code 2.5x payout
         player_blackjack_reward = int(wager) * 2.5
+        blackjack_winnings_for_print = int(player_blackjack_reward) - int(wager)
         player_money = int(player_money) + int(player_blackjack_reward)
-        print(f'You win {player_blackjack_reward} chips.')
+        print(f'You win {blackjack_winnings_for_print} chips.')
         print()
+        time.sleep(1)
 
     elif dealer_sum > 21 and hand_sum <= 21:
         player_win = True
         #payout code
         player_reward = int(wager) * 2
         player_money = int(player_money) + int(player_reward)
-        print(f'The dealer busts, you win {player_reward} chips!')
+        print(f'The dealer busts, you win {wager} chips!')
         print() 
+        time.sleep(1)
+
     elif dealer_sum < hand_sum and hand_sum <= 21:
         player_win = True
         player_reward = int(wager) * 2
         player_money = int(player_money) + int(player_reward)
-        print(f'The dealer busts, you win {player_reward} chips!') 
+        print(f'The dealer busts, you win {wager} chips!') 
         print()
+        time.sleep(1)
+
         #payout code
     elif dealer_sum == hand_sum and hand_sum <= 21:
         player_tie = True
         #return bet to hand
         player_money = int(player_money) + int(wager)
-        print(f'Standoff. Your wager of {wager} is returned to your hand.')
+        print(f'Standoff. Your wager of {wager} chips is returned to your hand.')
         print()
-        
+        time.sleep(1)
     else:
+        #chips have already been taken out when the bet was placed.
         print(f'You lose {wager} chips.')
         print()
-        #take money from hand
-        player_money = int(player_money) - int(wager)
+        time.sleep(1)
     print(f'You have {player_money} chips.')
+    time.sleep(.75)
     print()
-
+    
     if player_money == 0:
         print('You are out of money! Would you like to get more chips?')
+        print()
         while True:
             add_money = input('>')
             if add_money in ['yes', 'Yes', '1']:
                 print('How much would you like to add?')
+                print()
                 player_money = input('>')
                 if not player_money.isdigit():
                     print('Invalid input. Please enter a number')
@@ -251,6 +266,8 @@ while True:
                 else:
                     print(f'You receive {player_money} chips.')
                     print('')
+                    print('Are you ready for the next hand?')
+                    print()
                     break
 
                 
@@ -261,26 +278,35 @@ while True:
 
 
         if add_money in ['no', 'No', '2']:
+            print('Thanks for playing!')
             break
     else: 
         print('Do you want to play again?')
         print()
+
     # Replay
     while True:
+        #initializes add_money so the code can run properly
+        if player_money != 0:
+            add_money = ''
         if add_money in ['yes', 'Yes', '1']:
             break
-
     
         else:
-            replay = input('>')
-            if replay in ['yes', 'Yes', '1']:
-            # Check if deck needs to be shuffled. It's easiest just to do it after certain number of rounds.
-                replay_number = int(replay_number) + 1
-            elif replay in ['no', 'No', '2']:
-                break
-            else:
-                print('Please enter "yes" or "no".')
-            if replay_number == 10:
+            while True:
+                replay = input('>')
+                if replay in ['yes', 'Yes', '1']:
+                    break
+                elif replay in ['no', 'No', '2']:
+                    break
+                else:
+                    print('Please enter "yes" or "no".')
+                    print()
+                #shuffles deck every 10 hands 
+            if replay_number % 10 == 0:
+                print('Shuffling the deck...')
+                print()
+                time.sleep(5)
                 # Reshuffle the cards and "add" popped cards back into the deck... I'm not tracking popped cards so this is easiest.
                 ranks = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'Jack': 10, 'Queen': 10, 'King': 10, 'Ace': 11}
                 suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
@@ -293,11 +319,9 @@ while True:
             dealer_sum
             hand_sum
             break
-    if add_money in ['yes', 'Yes', '1']:
+    if add_money in ['yes', 'Yes', '1'] or replay in ['yes', 'Yes', '1']:
             continue
-    if replay in ['yes', 'Yes', '1']:
-            continue
-    if replay in ['no', 'No', '2']:
+    elif replay in ['no', 'No', '2']:
             break
     else:
         break
